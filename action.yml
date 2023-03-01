@@ -25,5 +25,7 @@ runs:
         dotnet-version: ${{ inputs.dotnet-version }}
 
     - name: Run tests
-      run: dotnet test ${${{ inputs.framework }}:+-f ${{ inputs.framework }}} ${{ inputs.test-target }}
+      run: |
+        echo "FRAMEWORK=${{ inputs.framework }}" >> $GITHUB_ENV
+        dotnet test ${FRAMEWORK:+-f $FRAMEWORK} ${{ inputs.test-target }}
       shell: bash
