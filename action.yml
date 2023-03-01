@@ -26,13 +26,16 @@ runs:
 
     - name: Run tests
       env:
+        # FRAMEWORK is used for "shell parameter expansion" below, which means the -f parameter is only inserted if a framework is provided
         FRAMEWORK: ${{ inputs.framework }}
       run: dotnet test --configuration Release --logger trx --results-directory "TestResults" ${FRAMEWORK:+"-f"} ${FRAMEWORK:+"$FRAMEWORK"} ${{ inputs.test-target }}
       shell: bash
+
     - name: Upload dotnet test results
+      # Use always() to always run this step to publish test results when there are test failures
+      if: ${{ always() }}
       uses: actions/upload-artifact@v3
       with:
         name: test-results
         path: TestResults
-        # Use always() to always run this step to publish test results when there are test failures
-        if: ${{ always() }}
+        
