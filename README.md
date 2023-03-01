@@ -24,7 +24,10 @@ jobs:
           dotnet-version: 7.x
           framework: net7.0
           test-target: src/MySolution.sln
+          logger: GitHubActions
 ```
+
+NOTE: If you want to use the GitHubActions logger, you have to install the `GitHubActionsTestLogger` NuGet package in your test projects first
 
 # Releasing new version
 
