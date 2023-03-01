@@ -2,7 +2,7 @@
 
 ```
 jobs:
-  release:
+  testrunner:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,7 +14,7 @@ You can optionally specify some parameters as well:
 
 ```
 jobs:
-  release:
+  testrunner:
     runs-on: ubuntu-latest
 
     steps:
