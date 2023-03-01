@@ -25,7 +25,14 @@ runs:
         dotnet-version: ${{ inputs.dotnet-version }}
 
     - name: Run tests
-      run: |
-        echo "FRAMEWORK=${{ inputs.framework }}" >> $GITHUB_ENV
-        dotnet test ${FRAMEWORK:+"-f"} ${FRAMEWORK:+"$FRAMEWORK"} ${{ inputs.test-target }}
+      env:
+        FRAMEWORK: ${{ inputs.framework }}
+      run: dotnet test --configuration Release --logger trx --results-directory "TestResults" ${FRAMEWORK:+"-f"} ${FRAMEWORK:+"$FRAMEWORK"} ${{ inputs.test-target }}
       shell: bash
+    - name: Upload dotnet test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: TestResults
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
