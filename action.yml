@@ -27,5 +27,5 @@ runs:
     - name: Run tests
       run: |
         echo "FRAMEWORK=${{ inputs.framework }}" >> $GITHUB_ENV
-        dotnet test ${FRAMEWORK:+-f $FRAMEWORK} ${{ inputs.test-target }}
+        dotnet test ${FRAMEWORK:+"-f"} ${FRAMEWORK:+"$FRAMEWORK"} ${{ inputs.test-target }}
       shell: bash
