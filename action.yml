@@ -1,0 +1,25 @@
+name: "Run all unit tests"
+description: "Uses dotnet CLI to run all unit tests in the given directory/project/solution"
+inputs:
+  test-target:
+    description: 'The path to the directory/project/solution to give to dotnet test (default is empty, which means the tool will guess)'
+    required: false
+    default: ''
+  dotnet-version:
+    description: 'The version of .NET to use (default is empty, which uses the latest version)'
+    required: false
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Run tests
+      run: dotnet test ${{ inputs.test-target }}
+      shell: bash
