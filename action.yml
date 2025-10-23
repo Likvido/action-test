@@ -5,10 +5,6 @@ inputs:
     description: 'The path to the directory/project/solution to give to dotnet test (default is empty, which means the tool will guess)'
     required: false
     default: ''
-  dotnet-version:
-    description: 'The version of .NET to use (default is empty, which uses the latest version)'
-    required: false
-    default: ''
   framework:
     description: 'The target framework to run tests for (default is to run for all target frameworks in the csproj files for the unit test projects)'
     required: false
@@ -22,11 +18,6 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@v5
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: ${{ inputs.dotnet-version }}
 
     - name: Run tests
       env:

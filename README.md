@@ -21,8 +21,7 @@ jobs:
       - name: Run tests
         uses: likvido/action-test@v1
         with:
-          dotnet-version: 7.x
-          framework: net7.0
+          framework: net8.0
           test-target: src/MySolution.sln
           logger: GitHubActions
 ```
