@@ -19,7 +19,7 @@ runs:
       # Without this setting dotnet test runs in VSTest mode and rejects --solution and --project with an
       # MSBuild switch error that does not say what is missing.
       run: |
-        if [ ! -f global.json ] || ! tr -d ' \t\r\n' < global.json | grep -q '"runner":"Microsoft.Testing.Platform"'; then
+        if [ ! -f global.json ] || ! tr -d ' \t\r\n' < global.json | grep -qi '"runner":"Microsoft.Testing.Platform"'; then
           echo '::error::likvido/action-test v2 runs tests with Microsoft.Testing.Platform, which needs a global.json in the repository root containing "test": { "runner": "Microsoft.Testing.Platform" }. Add it, or stay on likvido/action-test@v1.5 until the repository has moved.'
           exit 1
         fi
