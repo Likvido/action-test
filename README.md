@@ -31,7 +31,7 @@ jobs:
           test-target: src/MySolution.sln
 ```
 
-The action does not install the .NET SDK. Likvido's self-hosted `staging-arm64-runners` have it in the runner image; do not add `actions/setup-dotnet` there, because it tries to write into the image's SDK folder, which the runner user cannot write to, and fails. On a GitHub-hosted runner such as `ubuntu-latest`, add an `actions/setup-dotnet` step with `dotnet-version: 10.x` before the action.
+The action does not install the .NET SDK. Likvido's self-hosted `staging-arm64-runners` have it in the runner image; do not add `actions/setup-dotnet` there, because as soon as a newer 10.x SDK is out it installs that into the image's SDK folder, which the runner user cannot write to, and the step fails. On a GitHub-hosted runner such as `ubuntu-latest`, add an `actions/setup-dotnet` step with `dotnet-version: 10.x` before the action.
 
 The action checks out the repository itself and runs `dotnet test --configuration Release --results-directory TestResults`. It then uploads `TestResults` as the `test-results` artifact when the test run wrote anything there; a test project with only the packages above writes nothing there, so no artifact is uploaded.
 
