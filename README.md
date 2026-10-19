@@ -25,13 +25,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.x
+
       - name: Run tests
         uses: likvido/action-test@v2.0
         with:
           test-target: src/MySolution.sln
 ```
 
-The action checks out the repository itself, then runs `dotnet test --configuration Release --results-directory TestResults` and uploads `TestResults` as the `test-results` artifact.
+The action does not install the .NET SDK. It checks out the repository itself and runs `dotnet test --configuration Release --results-directory TestResults`. It then uploads `TestResults` as the `test-results` artifact when the test run wrote anything there; a test project with only the packages above writes nothing there, so no artifact is uploaded.
 
 ## Inputs
 
