@@ -1,29 +1,46 @@
 name: "Run all unit tests"
-description: "Uses dotnet CLI to run all unit tests in the given directory/project/solution"
+description: "Uses dotnet test in Microsoft.Testing.Platform mode to run the unit tests of a solution or project"
 inputs:
   test-target:
-    description: 'The path to the directory/project/solution to give to dotnet test (default is empty, which means the tool will guess)'
+    description: 'The solution (.sln, .slnx, .slnf) or project (a project file or a directory containing one) to test. Default is empty, which runs the solution or project in the repository root'
     required: false
     default: ''
   framework:
-    description: 'The target framework to run tests for (default is to run for all target frameworks in the csproj files for the unit test projects)'
+    description: 'The target framework to run tests for (default is to run for all target frameworks of the test projects)'
     required: false
     default: ''
-  logger:
-    description: 'The logger to use. Default is html'
-    required: false
-    default: 'html'
 runs:
   using: "composite"
   steps:
     - name: Checkout
       uses: actions/checkout@v7
 
+    - name: Check global.json
+      # Without this setting dotnet test runs in VSTest mode and rejects --solution and --project with an
+      # MSBuild switch error that does not say what is missing. Comment lines are dropped first, so a
+      # commented-out setting does not count.
+      run: |
+        if [ ! -f global.json ] || ! sed -E -e 's#^[[:space:]]*//.*##' -e 's#/\*([^*]|\*+[^*/])*\*+/##g' global.json | tr -d ' \t\r\n' | grep -qi '"runner":"Microsoft.Testing.Platform"'; then
+          echo '::error::likvido/action-test v2 runs tests with Microsoft.Testing.Platform, which needs a global.json in the repository root containing "test": { "runner": "Microsoft.Testing.Platform" }. Add it, or stay on likvido/action-test@v1.5 until the repository has moved.'
+          exit 1
+        fi
+      shell: bash
+
     - name: Run tests
       env:
-        # FRAMEWORK is used for "shell parameter expansion" below, which means the -f parameter is only inserted if a framework is provided
         FRAMEWORK: ${{ inputs.framework }}
-      run: dotnet test --configuration Release --logger ${{ inputs.logger }} --results-directory "TestResults" ${FRAMEWORK:+"-f"} ${FRAMEWORK:+"$FRAMEWORK"} ${{ inputs.test-target }}
+        TEST_TARGET: ${{ inputs.test-target }}
+      run: |
+        args=(--configuration Release --results-directory TestResults)
+        if [ -n "$FRAMEWORK" ]; then
+          args+=(--framework "$FRAMEWORK")
+        fi
+        case "$TEST_TARGET" in
+          '') ;;
+          *.sln|*.slnx|*.slnf) args+=(--solution "$TEST_TARGET") ;;
+          *) args+=(--project "$TEST_TARGET") ;;
+        esac
+        dotnet test "${args[@]}"
       shell: bash
 
     - name: Upload dotnet test results
@@ -34,4 +51,3 @@ runs:
         name: test-results
         path: TestResults
         if-no-files-found: ignore
-        
