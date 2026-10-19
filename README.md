@@ -14,7 +14,7 @@ v2 runs `dotnet test` in [Microsoft.Testing.Platform](https://learn.microsoft.co
   }
   ```
 
-- Test projects that run on MTP, for example xunit.v3 with `<OutputType>Exe</OutputType>`.
+- Test projects that run on MTP v2, for example `xunit.v3` 4.x with `<OutputType>Exe</OutputType>`. `xunit.v3` 3.x is built on MTP v1, which `GitHubActionsTestLogger` 3.x does not support.
 - The `GitHubActionsTestLogger` NuGet package (3.x) in each test project, for failed tests to show as annotations and in the job summary. It turns itself on when it runs in GitHub Actions, so no command-line option is needed.
 
 ## Usage
