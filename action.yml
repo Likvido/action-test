@@ -52,11 +52,13 @@ runs:
         esac
 
         if [ "$QUIET_BUILD" = "true" ]; then
-          build_args=("${common_args[@]}" --tl:off -clp:ErrorsOnly)
+          target_args=()
           if [ -n "$TEST_TARGET" ]; then
-            build_args+=("$TEST_TARGET")
+            target_args+=("$TEST_TARGET")
           fi
-          dotnet build "${build_args[@]}"
+          quiet_args=(--tl:off -clp:ErrorsOnly)
+          dotnet restore "${target_args[@]}" -p:Configuration=Release "${quiet_args[@]}"
+          dotnet build "${target_args[@]}" "${common_args[@]}" --no-restore "${quiet_args[@]}"
           test_args+=(--no-build)
         fi
 
