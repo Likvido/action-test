@@ -1,14 +1,20 @@
 name: "Run all unit tests"
 description: "Uses dotnet test in Microsoft.Testing.Platform mode to run the unit tests of a solution or project"
+
 inputs:
   test-target:
-    description: 'The solution (.sln, .slnx, .slnf) or project (a project file or a directory containing one) to test. Default is empty, which runs the solution or project in the repository root'
+    description: "The solution (.sln, .slnx, .slnf) or project (a project file or a directory containing one) to test. Default is empty, which runs the solution or project in the repository root"
     required: false
-    default: ''
+    default: ""
   framework:
-    description: 'The target framework to run tests for (default is to run for all target frameworks of the test projects)'
+    description: "The target framework to run tests for (default is to run for all target frameworks of the test projects)"
     required: false
-    default: ''
+    default: ""
+  quiet-build:
+    description: "Show only errors from restore and build before running tests"
+    required: false
+    default: "false"
+
 runs:
   using: "composite"
   steps:
@@ -19,32 +25,45 @@ runs:
       # Without this setting dotnet test runs in VSTest mode and rejects --solution and --project with an
       # MSBuild switch error that does not say what is missing. Comment lines are dropped first, so a
       # commented-out setting does not count.
+      shell: bash
       run: |
         if [ ! -f global.json ] || ! sed -E -e 's#^[[:space:]]*//.*##' -e 's#/\*([^*]|\*+[^*/])*\*+/##g' global.json | tr -d ' \t\r\n' | grep -qi '"runner":"Microsoft.Testing.Platform"'; then
           echo '::error::likvido/action-test v2 runs tests with Microsoft.Testing.Platform, which needs a global.json in the repository root containing "test": { "runner": "Microsoft.Testing.Platform" }. Add it, or stay on likvido/action-test@v1.5 until the repository has moved.'
           exit 1
         fi
-      shell: bash
 
     - name: Run tests
+      shell: bash
       env:
         FRAMEWORK: ${{ inputs.framework }}
         TEST_TARGET: ${{ inputs.test-target }}
+        QUIET_BUILD: ${{ inputs.quiet-build }}
       run: |
-        args=(--configuration Release --results-directory TestResults)
+        common_args=(--configuration Release)
         if [ -n "$FRAMEWORK" ]; then
-          args+=(--framework "$FRAMEWORK")
+          common_args+=(--framework "$FRAMEWORK")
         fi
+
+        test_args=(--results-directory TestResults)
         case "$TEST_TARGET" in
           '') ;;
-          *.sln|*.slnx|*.slnf) args+=(--solution "$TEST_TARGET") ;;
-          *) args+=(--project "$TEST_TARGET") ;;
+          *.sln|*.slnx|*.slnf) test_args+=(--solution "$TEST_TARGET") ;;
+          *) test_args+=(--project "$TEST_TARGET") ;;
         esac
-        dotnet test "${args[@]}"
-      shell: bash
+
+        if [ "$QUIET_BUILD" = "true" ]; then
+          build_args=("${common_args[@]}" --tl:off -clp:ErrorsOnly)
+          if [ -n "$TEST_TARGET" ]; then
+            build_args+=("$TEST_TARGET")
+          fi
+          dotnet build "${build_args[@]}"
+          test_args+=(--no-build)
+        fi
+
+        dotnet test "${common_args[@]}" "${test_args[@]}"
 
     - name: Upload dotnet test results
-      # Use always() to always run this step to publish test results when there are test failures
+      # Publish results even when tests fail.
       if: ${{ always() }}
       uses: actions/upload-artifact@v7
       with:
