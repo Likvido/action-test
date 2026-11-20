@@ -11,7 +11,7 @@ inputs:
     required: false
     default: ""
   quiet-build:
-    description: "Show only errors from restore and build before running tests"
+    description: "Show only errors from restore and build before running tests, unless GitHub Actions debug logging is enabled"
     required: false
     default: "false"
 
@@ -51,7 +51,7 @@ runs:
           *) test_args+=(--project "$TEST_TARGET") ;;
         esac
 
-        if [ "$QUIET_BUILD" = "true" ]; then
+        if [ "$QUIET_BUILD" = "true" ] && [ "${RUNNER_DEBUG:-}" != "1" ]; then
           target_args=()
           if [ -n "$TEST_TARGET" ]; then
             target_args+=("$TEST_TARGET")

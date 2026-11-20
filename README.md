@@ -41,6 +41,7 @@ The action checks out the repository itself and runs `dotnet test --configuratio
 |---|---|
 | `test-target` | A solution (`.sln`, `.slnx`, `.slnf`), passed as `--solution`, or a project file or a directory containing one, passed as `--project`. Default is empty, which tests the solution or project in the repository root. |
 | `framework` | The target framework to test, passed as `--framework`, such as `net10.0`. Default is empty, which tests every target framework of the test projects. |
+| `quiet-build` | Set to `true` to restore and build before running tests, showing only errors from those steps. With GitHub Actions debug logging enabled, the action ignores this input and shows normal restore and build output. NuGet auditing and test output are unchanged. Default is `false`. |
 
 The `logger` input of v1 is gone.
 
